@@ -1,2 +1,3 @@
-# climaticpark
-Repository with the source code of the CLIMATICPARK framework
+# CLIMATIC PARK - A Python-based framework for the climatic simulation of vehicular parking losts
+
+Work in progress...
