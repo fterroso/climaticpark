@@ -1,3 +1,3 @@
-# CLIMATIC PARK - A Python-based framework for the climatic simulation of vehicular parking losts
+# CLIMATICPARK - A Python-based framework for the climatic simulation of vehicular parking losts
 
 Work in progress...
