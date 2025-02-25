@@ -15,6 +15,7 @@ dependencies:
   - blas=1.0=mkl
   - blinker=1.9.0=py310haa95532_0
   - bottleneck=1.4.2=py310hc99e966_0
+  - branca=0.6.0=py310haa95532_0
   - brotli-python=1.0.9=py310h5da7b33_9
   - bzip2=1.0.8=h2bbff1b_6
   - c-ares=1.19.1=h2bbff1b_0
@@ -34,6 +35,7 @@ dependencies:
   - exceptiongroup=1.2.0=py310haa95532_0
   - executing=0.8.3=pyhd3eb1b0_0
   - flatbuffers=2.0.0=h6c2663c_0
+  - folium=0.14.0=py310haa95532_0
   - fonttools=4.55.3=py310h827c3e9_0
   - freetype=2.12.1=ha860e81_0
   - frozenlist=1.5.0=py310h827c3e9_0
@@ -53,6 +55,7 @@ dependencies:
   - ipykernel=6.29.5=py310haa95532_1
   - ipython=8.30.0=py310haa95532_0
   - jedi=0.19.2=py310haa95532_0
+  - jinja2=3.1.5=py310haa95532_0
   - joblib=1.4.2=py310haa95532_0
   - jpeg=9e=h827c3e9_3
   - jupyter_client=8.6.3=py310haa95532_0
