@@ -13,4 +13,5 @@ ClimaticPark is a pyhton library to simulate different environement variables of
 
 - `lib`: Includes the source code of the library.
 - `demo.ipynb`: Jupyter Notebook comprising a step by step guideline to use the library.
+- `data`: Includes the input data required for the step-by-step demo.
 - `environment.yml`: dependencies of the library.
