@@ -1,4 +1,4 @@
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/fterroso/climaticpark/f157f100175646e545ed8d2ba98d760d016fd76d?urlpath=lab%2Ftree%2Fdemo.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/fterroso/climaticpark/653f1274f2e3162f3ad5486a442ffd1b9f48df53?urlpath=lab%2Ftree%2Fdemo.ipynb)
 
 # CLIMATICPARK - A Python-based framework for the climatic simulation of vehicular parking losts
 
