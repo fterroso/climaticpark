@@ -13,9 +13,7 @@ ClimaticPark is a pyhton library to simulate different environement variables of
 
 # Class Diagram
 
-![UML class diagram]([files/Users/jzhang/Desktop/Isolated.png](https://github.com/fterroso/climaticpark/blob/main/figs/climaticpark_arch.png))
-
-
+![image-url](https://github.com/fterroso/climaticpark/blob/main/figs/climaticpark_arch.png)
 
 
 # Content
