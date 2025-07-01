@@ -11,7 +11,9 @@ ClimaticPark is a pyhton library to simulate different environement variables of
 - Cabin temperature of vehicles while they remain parked in the parking lot.
 - The fuel consumption required by the air-conditioning system of these vehicles to cool them down based on a predefined comfort temperature
 
-## Content
+# Class Diagram
+
+# Content
 
 - `lib`: Includes the source code of the library.
 - `demo.ipynb`: Jupyter Notebook comprising a step by step guideline to use the library.
