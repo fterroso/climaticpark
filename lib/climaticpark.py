@@ -1,9 +1,5 @@
-# %%
-# Importing necessary libraries (see configuration file climaticpark_env.yml in github repo)
-#!pip install pybdshadow contextily folium pillow timezonefinder plotly
 
-# %%
-# Library Imports
+# Third-party libraries
 import pandas as pd
 import numpy as np
 import requests
@@ -100,23 +96,6 @@ class ShadowModule:
                 except Exception as e:
                     coverage_rates = [0] * len(coverage_rates_gdf)
                     print(f"WARN:: No coverage computed for date {date_hour}: {e}")
-
-
-                """
-                coverage_rates = []
-                for index, parking_space in self.spaces.iterrows():
-                    parking_space_gdf = gpd.GeoDataFrame(geometry=self..geometry)
-                    parking_space_gdf = parking_space_gdf.set_crs(epsg=4326)
-                    parking_space_gdf = parking_space_gdf.to_crs(epsg=shadows_gdf.crs.to_epsg())
-
-                    intersection = gpd.overlay(parking_space_gdf, shadows_gdf, how='intersection')
-
-                    intersection_area = intersection.geometry.area.sum()
-                    parking_space_area = parking_space_gdf.geometry.area.sum()
-
-                    coverage_rate = intersection_area / parking_space_area
-                    coverage_rates.append(coverage_rate)
-                """
 
                 coverage_rates_gdf[f'coverage_rate_{date_hour.strftime("%Y-%m-%d %H:%M")}'] = coverage_rates
 
@@ -623,14 +602,6 @@ class AmbientModule:
         else:
             print(f"Request error: {response.status_code} - {response.text}")
             return pd.DataFrame()
-          
-    """
-    def _forecast_uncovered_cabin_temperatures(self, ambient_temp):
-        ambient_temp_scaled = self.temp_scaler.fit_transform(ambient_temp)
-        y_pred = self.cabin_temp_model.predict(ambient_temp_scaled)
-        y_pred_rescaled = self.cabin_temp_scaler.inverse_transform(y_pred)
-        return y_pred_rescaled"
-    """
 
 # %%
 class Vehicle:
@@ -714,6 +685,14 @@ class Vehicle:
     def __repr__(self):
         return self.__str__()
 
+class AllocationPolicy(Enum):
+
+    "Enumeration defining the different policies to assign drivers to spaces"
+
+    RANDOM = 1 #Random assignment
+    MIN_DIST = 2 #The space closest to the entry gate is assigned
+    RANDOMIZED_MIN_DIST = 3 #The available spaces are weighted based on its distance to the closest gate
+
 class OccupancyModule:
 
     def __init__(self, spaces:gpd.GeoDataFrame, gates:gpd.GeoDataFrame):
@@ -727,30 +706,44 @@ class OccupancyModule:
         nearest_idx = distances.idxmin()
         return pd.Series([self._gates.loc[nearest_idx, 'id'], distances[nearest_idx]])
     
-    def _select_weighted_random_row(self, gdf:gpd.GeoDataFrame, weight_col='nearest_gate_dist'):
+    def _select_weighted_random_row(self, gdf:gpd.GeoDataFrame,  assignment_policy: AllocationPolicy, weight_col='nearest_gate_dist',):
 
         try:
-            if weight_col not in gdf.columns:
-                raise ValueError(f"Column {weight_col} does not exist in GeoDataFrame")
-            
-            weights = gdf[weight_col].values
 
-            max_finite = np.nanmax(weights[weights != np.inf])  # Maximum finite value in p
-            if np.isfinite(max_finite):
-                weights = np.where(np.isinf(weights), max_finite, weights)  # Replace inf with the maximum finite value.
+            if assignment_policy== AllocationPolicy.RANDOM:
+                # We randomly select a space
+                selected_idx = np.random.choice(gdf.index)
+                return selected_idx
+            elif assignment_policy== AllocationPolicy.MIN_DIST:
+                if weight_col not in gdf.columns:
+                    raise ValueError(f"Column {weight_col} does not exist in GeoDataFrame")
+                # Select the space with minimum distance value
+                selected_idx = gdf[weight_col].idxmin()
+                return selected_idx
+            else:
             
-            min_finite = np.nanmin(weights[weights != 0])  # Maximum finite value in p
+                if weight_col not in gdf.columns:
+                    raise ValueError(f"Column {weight_col} does not exist in GeoDataFrame")
+                
+                weights = gdf[weight_col].values
 
-            weights = weights + min_finite
-            inv_weights = 1 / weights    
-            norm_inv_weights = inv_weights / np.sum(inv_weights)
-            selected_idx = np.random.choice(gdf.index, p=norm_inv_weights)
-            return selected_idx
+                max_finite = np.nanmax(weights[weights != np.inf])  # Maximum finite value in p
+                if np.isfinite(max_finite):
+                    weights = np.where(np.isinf(weights), max_finite, weights)  # Replace inf with the maximum finite value.
+                
+                min_finite = np.nanmin(weights[weights != 0])  # Maximum finite value in p
+
+                weights = weights + min_finite
+                inv_weights = 1 / weights    
+                norm_inv_weights = inv_weights / np.sum(inv_weights)
+                selected_idx = np.random.choice(gdf.index, p=norm_inv_weights)
+                return selected_idx
         except:
             print("WARN: It was not possible to assign space to incoming vehicle")
             return -1
 
-    def simulate_occupancies(self, days_lst:list, entry_exits:dict):
+
+    def simulate_occupancies(self, days_lst:list, entry_exits:dict, assignment_policy: AllocationPolicy):
 
         local_tz = pytz.timezone('Europe/Madrid')
 
@@ -785,7 +778,7 @@ class OccupancyModule:
                 if date_hour_str in entry_exits:
                     exit_hours_lst = entry_exits[date_hour_str]
                     for exit_hour in exit_hours_lst:
-                        selected_space = self._select_weighted_random_row(simulated_occupancy[simulated_occupancy[current_column_name]==-1])
+                        selected_space = self._select_weighted_random_row(simulated_occupancy[simulated_occupancy[current_column_name]==-1], assignment_policy)
                         if selected_space >= 0:
 
                             simulated_occupancy.at[selected_space,current_column_name]= current_vehicle_id#True
@@ -998,7 +991,6 @@ class CabinTemperatureModule:
 
         return m
 
-# %%
 class ClimaticParkState(Enum):
 
     "Enumeration defining the states of the simulation"
@@ -1007,7 +999,9 @@ class ClimaticParkState(Enum):
     READY = 2
     LAUNCHED = 3
 
-# %%
+
+
+
 class ClimaticPark:
 
     """
@@ -1135,7 +1129,7 @@ class ClimaticPark:
 
         print("Simulation ready to go!!")
 
-    def launch_simulation(self, n_days_ahead:int, display_details=True):
+    def launch_simulation(self, n_days_ahead:int, allocation_policy= AllocationPolicy.RANDOMIZED_MIN_DIST, display_details=True):
         """
         Lauch simulation for n_days_ahead 
         """
@@ -1150,7 +1144,7 @@ class ClimaticPark:
         date_lst = [init_day + timedelta(days=i) for i in range(n_days_ahead)]
         entry_exits= self.demand_module.generate_entry_exit_hours(date_lst)
 
-        simulated_vehicles_dict = self.occupancy_module.simulate_occupancies(date_lst, entry_exits)    
+        simulated_vehicles_dict = self.occupancy_module.simulate_occupancies(date_lst, entry_exits, allocation_policy)    
         simulated_coverage_rates= self.shadow_module.compute_coverage_rates(date_lst)
 
         forecasted_ambient_temp_dict= self.ambient_module.predict_ambient_temperature(date_lst)
